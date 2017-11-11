@@ -242,7 +242,7 @@ BMP* BMP_ReadFile( const char* filename )
 
 	/* Verify that the bitmap variant is supported */
 	if ( ( bmp->Header.BitsPerPixel != 32 && bmp->Header.BitsPerPixel != 24 && bmp->Header.BitsPerPixel != 8 )
-		|| bmp->Header.CompressionType != 0 || bmp->Header.HeaderSize != 40 )
+		|| bmp->Header.CompressionType != 0 /*|| bmp->Header.HeaderSize != 40*/ )
 	{
 		BMP_LAST_ERROR_CODE = BMP_FILE_NOT_SUPPORTED;
 		fclose( f );
