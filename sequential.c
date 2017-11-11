@@ -7,6 +7,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <qdbmp.h>
+
+#define EXIT_ERROR -1
 
 int parse_input( int argc, char** argv, char** input_file, char** output_file );
 
@@ -19,6 +22,17 @@ int main( int argc, char** argv )
 
     printf( "In: %s\nOut: %s\n", input_file, output_file );
 
+    unsigned int width, height;
+    BMP* bmp;
+
+    bmp = BMP_ReadFile( input_file );
+    BMP_CHECK_ERROR( stderr, EXIT_ERROR );
+
+    BMP_WriteFile( bmp, output_file );
+    BMP_CHECK_ERROR( stderr, EXIT_ERROR );
+
+    BMP_Free( bmp );
+
     return 0;
 }
 
@@ -26,8 +40,8 @@ int parse_input( int argc, char** argv, char** input_file, char** output_file )
 {
     if( argc <= 1 )
     {
-        fprintf( stderr, "Usage: ./sequential <input file> <output file>" );
-        exit( -1 );
+        fprintf( stderr, "Usage: ./sequential <input file> <output file>\n" );
+        exit( EXIT_ERROR );
     }
 
     int input_length = strlen( argv[1] );
@@ -46,8 +60,8 @@ int parse_input( int argc, char** argv, char** input_file, char** output_file )
         char* dot_char = strchr( *input_file, '.' );
         if( dot_char == NULL )
         {
-            fprintf( stderr, "Input file extension not provided" );
-            exit( -1 );
+            fprintf( stderr, "Input file extension not provided\n" );
+            exit( EXIT_ERROR );
         }
 
         int dot_position = ( dot_char - *input_file );
