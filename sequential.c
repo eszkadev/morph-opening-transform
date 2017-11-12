@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <qdbmp.h>
+#include "sequential_operations.h"
 
 #define EXIT_ERROR -1
 
@@ -27,6 +28,8 @@ int main( int argc, char** argv )
 
     bmp = BMP_ReadFile( input_file );
     BMP_CHECK_ERROR( stderr, EXIT_ERROR );
+
+    bmp = opening( bmp );
 
     BMP_WriteFile( bmp, output_file );
     BMP_CHECK_ERROR( stderr, EXIT_ERROR );

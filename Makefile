@@ -8,7 +8,7 @@ OUT = out
 all: dependencies sequential
 
 sequential: dependencies
-	$(CC) $(CC_FLAGS) sequential.c -o $(OUT)/sequential -I$(INC) -L$(OUT) -lqdbmp
+	$(CC) $(CC_FLAGS) sequential.c sequential_operations.c -o $(OUT)/sequential -I$(INC) -L$(OUT) -lqdbmp
 
 dependencies: out_dir qdbmp
 
