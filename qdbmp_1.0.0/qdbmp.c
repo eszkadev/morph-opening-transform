@@ -171,6 +171,82 @@ BMP* BMP_Create( UINT width, UINT height, USHORT depth )
 
 
 /**************************************************************
+	Creates a copy of BMP.
+**************************************************************/
+BMP* BMP_CreateCopy( BMP* bmp_old )
+{
+	UINT	width;
+	UINT	height;
+	USHORT	depth;
+	BMP*	bmp;
+
+	width = BMP_GetWidth( bmp_old );
+	height = BMP_GetHeight( bmp_old );
+	depth = BMP_GetDepth( bmp_old );
+
+	int	bytes_per_pixel = depth >> 3;
+
+	if ( height <= 0 || width <= 0 )
+	{
+		BMP_LAST_ERROR_CODE = BMP_INVALID_ARGUMENT;
+		return NULL;
+	}
+
+	if ( depth != 8 && depth != 24 && depth != 32 )
+	{
+		BMP_LAST_ERROR_CODE = BMP_FILE_NOT_SUPPORTED;
+		return NULL;
+	}
+
+
+	/* Allocate the bitmap data structure */
+	bmp = calloc( 1, sizeof( BMP ) );
+	if ( bmp == NULL )
+	{
+		BMP_LAST_ERROR_CODE = BMP_OUT_OF_MEMORY;
+		return NULL;
+	}
+
+	/* Copy the header */
+	memcpy( &bmp->Header, &bmp_old->Header, sizeof( BMP_Header ) );
+
+	/* Copy the palette */
+	if ( bmp->Header.BitsPerPixel == 8 )
+	{
+		bmp->Palette = (UCHAR*) calloc( BMP_PALETTE_SIZE, sizeof( UCHAR ) );
+		if ( bmp->Palette == NULL )
+		{
+			BMP_LAST_ERROR_CODE = BMP_OUT_OF_MEMORY;
+			free( bmp );
+			return NULL;
+		}
+		memcpy( bmp->Palette, bmp_old->Palette, BMP_PALETTE_SIZE * sizeof( UCHAR ) );
+	}
+	else
+	{
+		bmp->Palette = NULL;
+	}
+
+
+	/* Allocate pixels */
+	bmp->Data = (UCHAR*) calloc( bmp->Header.ImageDataSize, sizeof( UCHAR ) );
+	if ( bmp->Data == NULL )
+	{
+		BMP_LAST_ERROR_CODE = BMP_OUT_OF_MEMORY;
+		free( bmp->Palette );
+		free( bmp );
+		return NULL;
+	}
+
+	memcpy( bmp->Data, bmp_old->Data, bmp->Header.ImageDataSize * sizeof( UCHAR ) );
+
+	BMP_LAST_ERROR_CODE = BMP_OK;
+
+	return bmp;
+}
+
+
+/**************************************************************
 	Frees all the memory used by the specified BMP image.
 **************************************************************/
 void BMP_Free( BMP* bmp )
@@ -474,9 +550,22 @@ void BMP_SetPixelRGB( BMP* bmp, UINT x, UINT y, UCHAR r, UCHAR g, UCHAR b )
 		BMP_LAST_ERROR_CODE = BMP_INVALID_ARGUMENT;
 	}
 
-	else if ( bmp->Header.BitsPerPixel != 24 && bmp->Header.BitsPerPixel != 32 )
+	else if ( bmp->Header.BitsPerPixel != 8 && bmp->Header.BitsPerPixel != 24 && bmp->Header.BitsPerPixel != 32 )
 	{
 		BMP_LAST_ERROR_CODE = BMP_TYPE_MISMATCH;
+	}
+
+	else if ( bmp->Header.BitsPerPixel == 8 )
+	{
+		BMP_LAST_ERROR_CODE = BMP_OK;
+
+		/* Row's size is rounded up to the next multiple of 4 bytes */
+		bytes_per_row = bmp->Header.ImageDataSize / bmp->Header.Height;
+
+		/* Calculate the location of the relevant pixel (rows are flipped) */
+		pixel = bmp->Data + ( ( bmp->Header.Height - y - 1 ) * bytes_per_row + x );
+
+		*pixel = r;
 	}
 
 	else

@@ -91,6 +91,7 @@ typedef struct _BMP BMP;
 
 /* Construction/destruction */
 BMP*			BMP_Create					( UINT width, UINT height, USHORT depth );
+BMP*			BMP_CreateCopy				( BMP* bmp );
 void			BMP_Free					( BMP* bmp );
 
 

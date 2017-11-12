@@ -23,18 +23,19 @@ int main( int argc, char** argv )
 
     printf( "In: %s\nOut: %s\n", input_file, output_file );
 
-    unsigned int width, height;
     BMP* bmp;
+    BMP* out;
 
     bmp = BMP_ReadFile( input_file );
     BMP_CHECK_ERROR( stderr, EXIT_ERROR );
 
-    bmp = opening( bmp );
+    out = opening( bmp, CROSS );
 
-    BMP_WriteFile( bmp, output_file );
+    BMP_WriteFile( out, output_file );
     BMP_CHECK_ERROR( stderr, EXIT_ERROR );
 
     BMP_Free( bmp );
+    BMP_Free( out );
 
     return 0;
 }
@@ -47,10 +48,10 @@ int parse_input( int argc, char** argv, char** input_file, char** output_file )
         exit( EXIT_ERROR );
     }
 
-    int input_length = strlen( argv[1] );
+    int input_length = strlen( argv[ 1 ] );
     *input_file = (char*)malloc( ( input_length + 1 ) * sizeof( char ) );
-    strncpy( *input_file, argv[1], input_length );
-    (*input_file)[input_length] = '\0';
+    strncpy( *input_file, argv[ 1 ], input_length );
+    ( *input_file )[ input_length ] = '\0';
 
     if( argc == 2 )
     {
@@ -70,17 +71,17 @@ int parse_input( int argc, char** argv, char** input_file, char** output_file )
         int dot_position = ( dot_char - *input_file );
         int chars_left = input_length + sufix_length - dot_position;
         strncpy( *output_file, argv[1], dot_position );
-        (*output_file)[dot_position] = '\0';
+        ( *output_file )[ dot_position ] = '\0';
         strncat( *output_file, sufix, chars_left );
         chars_left -= sufix_length;
         strncat( *output_file, dot_char, chars_left );
-        (*output_file)[input_length + sufix_length] = '\0';
+        ( *output_file )[ input_length + sufix_length ] = '\0';
     }
     else
     {
-        int output_length = strlen( argv[2] );
+        int output_length = strlen( argv[ 2 ] );
         *output_file = (char*)malloc( ( output_length + 1 ) * sizeof( char ) );
-        strncpy( *output_file, argv[2], output_length );
-        (*output_file)[output_length] = '\0';
+        strncpy( *output_file, argv[ 2 ], output_length );
+        ( *output_file )[ output_length ] = '\0';
     }
 }
