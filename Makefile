@@ -5,10 +5,13 @@ QDBMP_PATH = qdbmp_1.0.0
 INC = $(QDBMP_PATH)
 OUT = out
 
-all: dependencies sequential
+all: dependencies sequential test
 
 sequential: dependencies
 	$(CC) $(CC_FLAGS) sequential.c sequential_operations.c -o $(OUT)/sequential -I$(INC) -L$(OUT) -lqdbmp
+
+test: sequential
+	$(CC) $(CC_FLAGS) test.c sequential_operations.c -o $(OUT)/test -I$(INC) -L$(OUT) -lqdbmp
 
 dependencies: out_dir qdbmp
 

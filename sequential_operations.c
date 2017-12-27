@@ -19,7 +19,7 @@ static const MORPHOLOGICAL_OPERATOR MORPHOLOGICAL_OPERATORS[] =
 };
 
 /* Normalize values */
-inline char GetPixelValue( unsigned char* value )
+inline char GetPixelValue( unsigned char value )
 {
     if ( value > 130 )
         return 255;
