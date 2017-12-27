@@ -16,7 +16,7 @@
 
 #define TEST(name, operation, file1, file2) \
 void name() { \
-    printf("%s ...\t", #name); \
+    printf( "%s ...\t", #name ); \
     BMP* bmp1 = BMP_ReadFile( file1 ); \
     assert( bmp1 ); \
     BMP* bmp2 = BMP_ReadFile( file2 ); \
@@ -25,10 +25,12 @@ void name() { \
     if( operation == EROSION ) \
         out = erosion( bmp1, CROSS ); \
     assert( out ); \
-    if( compare_images( out, bmp2 ) ) printf("OK\n"); \
+    if( compare_images( out, bmp2 ) ) printf( "OK\n" ); \
     else { \
-        printf("FAILED\n"); \
-        BMP_WriteFile( out, "out.bmp" ); \
+        printf( "FAILED\n" ); \
+        char* output_file = (char*)malloc( sizeof(char) * ( strlen( #name ) + 8 ) ); \
+        sprintf( output_file, "%s%s.bmp", #name, "out" ); \
+        BMP_WriteFile( out, output_file ); \
     } \
     BMP_Free( bmp1 ); \
     BMP_Free( bmp2 ); \
