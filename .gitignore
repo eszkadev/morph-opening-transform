@@ -1,2 +1,5 @@
 out/*
-test_data/8096.bmp
+test_data/1024.bmp
+test_data/2048.bmp
+test_data/4096.bmp
+test_data/8192.bmp

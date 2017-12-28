@@ -76,10 +76,14 @@ TEST( wiki1_erosion, erosion, SQUARE, "test_data/wiki_1.bmp", "test_data/wiki_1_
 TEST( wiki1_opening, opening, SQUARE, "test_data/wiki_1.bmp", "test_data/wiki_1_square_opening.bmp" )
 
 TEST( opening_1024, opening, SQUARE, "test_data/1024.bmp", "" )
-TEST( opening_8096, opening, SQUARE, "test_data/8096.bmp", "" )
+TEST( opening_2048, opening, SQUARE, "test_data/2048.bmp", "" )
+TEST( opening_4096, opening, SQUARE, "test_data/4096.bmp", "" )
+TEST( opening_8192, opening, SQUARE, "test_data/8192.bmp", "" )
 
 int main( int argc, char** argv )
 {
+    printf( "============== Unit testing ===============\n" );
+
     empty_3x3_erosion();
     cross_3x3_erosion();
     wiki2_cross_erosion();
@@ -90,8 +94,12 @@ int main( int argc, char** argv )
     wiki1_erosion();
     wiki1_opening();
 
+    printf( "=========== Performance testing ===========\n" );
+
     opening_1024();
-    opening_8096();
+    opening_2048();
+    opening_4096();
+    opening_8192();
 
     return 0;
 }
