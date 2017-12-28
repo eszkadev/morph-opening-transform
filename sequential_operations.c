@@ -88,9 +88,11 @@ IMAGE_MODEL* dilatation( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
 
     IMAGE_MODEL* output = create_image_model( width, height );
 
-    for( y = 0; y < height - 1; ++y )
+    int y_offset = -1 * current_operator.y;
+    int x_offset = -1 * current_operator.x;
+    for( y = y_offset; y < height + y_offset; ++y )
     {
-        for( x = 0; x < width - 1; ++x )
+        for( x = x_offset; x < width + x_offset; ++x )
         {
             unsigned char r, g, b;
 
@@ -103,7 +105,9 @@ IMAGE_MODEL* dilatation( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
                 {
                     if( current_operator.tab[ i ][ j ] == 1 )
                     {
-                        if( !input->data[ x + j ][ y + i ] )
+                        if( x + j >= 0 && x + j < width &&
+                            y + i >= 0 && y + i < height &&
+                            !input->data[ x + j ][ y + i ] )
                         {
                             condition = 1;
                             break;
@@ -114,10 +118,14 @@ IMAGE_MODEL* dilatation( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
                     break;
             }
 
-            if( condition )
-                output->data[ x + current_operator.x ][ y + current_operator.y ] = 0;
-            else
-                output->data[ x + current_operator.x ][ y + current_operator.y ] = 255;
+            if( x + current_operator.x >= 0 && x + current_operator.x < width &&
+                y + current_operator.y >= 0 && y + current_operator.y < height )
+            {
+                if( condition )
+                    output->data[ x + current_operator.x ][ y + current_operator.y ] = 0;
+                else
+                    output->data[ x + current_operator.x ][ y + current_operator.y ] = 255;
+            }
         }
     }
 
