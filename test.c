@@ -48,11 +48,13 @@ void name() { \
     BMP_Free( bmp2 ); \
 } \
 
-TEST(cross_3x3, erosion, "test_data/3x3_cross.bmp", "test_data/3x3_cross_cross_erosion.bmp")
-TEST(wiki2_cross_erosion, erosion, "test_data/wiki_2.bmp", "test_data/wiki_2_cross_erosion.bmp")
+TEST( empty_3x3, erosion, "test_data/3x3_empty.bmp", "test_data/3x3_empty_erosion.bmp" )
+TEST( cross_3x3, erosion, "test_data/3x3_cross.bmp", "test_data/3x3_cross_cross_erosion.bmp" )
+TEST( wiki2_cross_erosion, erosion, "test_data/wiki_2.bmp", "test_data/wiki_2_cross_erosion.bmp" )
 
 int main( int argc, char** argv )
 {
+    empty_3x3();
     cross_3x3();
     wiki2_cross_erosion();
 
