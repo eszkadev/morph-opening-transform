@@ -9,6 +9,7 @@
 #include <string.h>
 #include <assert.h>
 #include <qdbmp.h>
+#include <time.h>
 #include "operations.h"
 
 #define EXIT_ERROR -1
@@ -26,21 +27,25 @@ void name() { \
     IMAGE_MODEL* model2 = bmp_to_image_model( bmp2 ); \
     assert( model2 ); \
     /*print_model( model2 );*/ \
+    time_t before, after; \
+    time(&before); \
     IMAGE_MODEL* output_model = operation( model1, operator ); \
+    time(&after); \
     /*print_model( output_model );*/ \
     assert( output_model ); \
     int result = compare_models( output_model, model2 ); \
-    if( result == EQUALS ) printf( "OK\n" ); \
+    if( result == EQUALS ) printf( "OK" ); \
     else if( result == SIZE_DOESNT_MATCH ) printf( "Size doesn't match " ); \
     else if( result == CONTENT_IS_DIFFERENT ) ; \
     if( result != EQUALS ) { \
-        printf( "FAILED\n" ); \
+        printf( "FAILED" ); \
         char* output_file = (char*)malloc( sizeof(char) * ( strlen( #name ) + 8 ) ); \
         sprintf( output_file, "%s%s.bmp", #name, "out" ); \
         BMP* out = image_model_to_bmp( output_model ); \
         BMP_WriteFile( out, output_file ); \
         BMP_Free( out ); \
     } \
+    printf("\tTime: %f s\n", difftime( after, before ) ); \
     free_image_model( model1 ); \
     free_image_model( model2 ); \
     free_image_model( output_model ); \
