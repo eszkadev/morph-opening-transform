@@ -5,7 +5,7 @@ QDBMP_PATH = qdbmp_1.0.0
 INC = $(QDBMP_PATH)
 OUT = out
 
-all: dependencies sequential basic_parallel test_sequential test_basic_parallel
+all: dependencies sequential basic_parallel test_sequential test_basic_parallel generate_testcase
 
 sequential: dependencies
 	$(CC) $(CC_FLAGS) main.c sequential_operations.c image_model.c -o $(OUT)/sequential -I$(INC) -L$(OUT) -lqdbmp
@@ -18,6 +18,9 @@ test_sequential: sequential
 
 test_basic_parallel: basic_parallel
 	$(CC) $(CC_FLAGS) test.c image_model.c basic_parallel_operations.c -o $(OUT)/test_basic_parallel -I$(INC) -L$(OUT) -lqdbmp
+
+generate_testcase: dependencies
+	$(CC) $(CC_FLAGS) generate_testcase.c image_model.c -o $(OUT)/generate_testcase -I$(INC) -L$(OUT) -lqdbmp
 
 dependencies: out_dir qdbmp
 
