@@ -55,6 +55,9 @@ TEST( wiki2_cross_erosion, erosion, CROSS, "test_data/wiki_2.bmp", "test_data/wi
 TEST( empty_3x3_dilatation, dilatation, CROSS, "test_data/3x3_empty.bmp", "test_data/3x3_empty.bmp" )
 TEST( wiki2_dilatation, dilatation, SQUARE, "test_data/wiki_2.bmp", "test_data/wiki_2_dilatation.bmp" )
 
+TEST( wiki1_erosion, erosion, SQUARE, "test_data/wiki_1.bmp", "test_data/wiki_1_square_erosion.bmp" )
+TEST( wiki1_opening, opening, SQUARE, "test_data/wiki_1.bmp", "test_data/wiki_1_square_opening.bmp" )
+
 int main( int argc, char** argv )
 {
     empty_3x3_erosion();
@@ -63,6 +66,9 @@ int main( int argc, char** argv )
 
     empty_3x3_dilatation();
     wiki2_dilatation();
+
+    wiki1_erosion();
+    wiki1_opening();
 
     return 0;
 }
