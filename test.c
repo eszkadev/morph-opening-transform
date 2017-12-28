@@ -9,7 +9,7 @@
 #include <string.h>
 #include <assert.h>
 #include <qdbmp.h>
-#include "sequential_operations.h"
+#include "operations.h"
 
 #define EXIT_ERROR -1
 
