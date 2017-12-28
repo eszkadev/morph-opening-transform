@@ -16,6 +16,7 @@ typedef struct
 static const MORPHOLOGICAL_OPERATOR MORPHOLOGICAL_OPERATORS[] =
 {
     { 1, 1, { 0, 1, 0, 1, 1, 1, 0, 1, 0 } },
+    { 1, 1, { 1, 1, 1, 1, 1, 1, 1, 1, 1 } },
 };
 
 IMAGE_MODEL* erosion( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
@@ -43,21 +44,22 @@ IMAGE_MODEL* erosion( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
             {
                 for( j = 0; j < 3; ++j )
                 {
-                    if( x + j >= 0 && x + j < width &&
-                        y + i >= 0 && y + i < height &&
-                        current_operator.tab[ i ][ j ] )
+                    if( current_operator.tab[ i ][ j ] )
                     {
-                        if( input->data[ x + j ][ y + i ] )
+                        int correct_position = ( x + j >= 0 && x + j < width
+                            && y + i >= 0 && y + i < height ) ? 1 : 0;
+
+                        if( correct_position && input->data[ x + j ][ y + i ] )
                         {
                             condition = 1;
                             break;
                         }
-                    }
-                    else if( current_operator.tab[ i ][ j ] )
-                    {
-                        // pixels out of an image are empty
-                        condition = 1;
-                        break;
+                        else if( !correct_position )
+                        {
+                            // pixels out of an image are empty
+                            condition = 1;
+                            break;
+                        }
                     }
                 }
                 if( condition )
@@ -101,9 +103,9 @@ IMAGE_MODEL* dilatation( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
             int j;
             for( i = 0; i < 3; ++i )
             {
-                for ( j = 0; j < 3; ++j )
+                for( j = 0; j < 3; ++j )
                 {
-                    if( current_operator.tab[ i ][ j ] == 1 )
+                    if( current_operator.tab[ i ][ j ] )
                     {
                         if( x + j >= 0 && x + j < width &&
                             y + i >= 0 && y + i < height &&

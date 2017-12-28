@@ -11,6 +11,7 @@
 typedef enum
 {
     CROSS = 0,
+    SQUARE = 1,
 } MORPH_OPERATOR_ENUM;
 
 IMAGE_MODEL* erosion( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator );
