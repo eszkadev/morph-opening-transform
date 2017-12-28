@@ -33,6 +33,7 @@ IMAGE_MODEL* erosion( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
     int x_offset = -1 * current_operator.x;
     for( y = y_offset; y < height + y_offset; ++y )
     {
+        #pragma omp parallel for
         for( x = x_offset; x < width + x_offset; ++x )
         {
             unsigned char r, g, b;
@@ -94,6 +95,7 @@ IMAGE_MODEL* dilatation( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
     int x_offset = -1 * current_operator.x;
     for( y = y_offset; y < height + y_offset; ++y )
     {
+        #pragma omp parallel for
         for( x = x_offset; x < width + x_offset; ++x )
         {
             unsigned char r, g, b;
