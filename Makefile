@@ -8,10 +8,10 @@ OUT = out
 all: dependencies sequential test
 
 sequential: dependencies
-	$(CC) $(CC_FLAGS) sequential.c sequential_operations.c -o $(OUT)/sequential -I$(INC) -L$(OUT) -lqdbmp
+	$(CC) $(CC_FLAGS) sequential.c sequential_operations.c image_model.c -o $(OUT)/sequential -I$(INC) -L$(OUT) -lqdbmp
 
 test: sequential
-	$(CC) $(CC_FLAGS) test.c sequential_operations.c -o $(OUT)/test -I$(INC) -L$(OUT) -lqdbmp
+	$(CC) $(CC_FLAGS) test.c image_model.c sequential_operations.c -o $(OUT)/test -I$(INC) -L$(OUT) -lqdbmp
 
 dependencies: out_dir qdbmp
 

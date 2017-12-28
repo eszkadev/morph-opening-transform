@@ -15,26 +15,78 @@ typedef struct
 
 static const MORPHOLOGICAL_OPERATOR MORPHOLOGICAL_OPERATORS[] =
 {
-    { 1, 1, { 0, 1, 0, 1, 0, 1, 0, 1, 0 } },
+    { 1, 1, { 0, 1, 0, 1, 1, 1, 0, 1, 0 } },
 };
 
-/* Normalize values */
-inline char GetPixelValue( unsigned char value )
-{
-    if ( value > 130 )
-        return 255;
-    else
-        return 0;
-}
-
-BMP* erosion( BMP* input, MORPH_OPERATOR_ENUM operator )
+IMAGE_MODEL* erosion( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
 {
     MORPHOLOGICAL_OPERATOR current_operator = MORPHOLOGICAL_OPERATORS[ operator ];
-    BMP* output = BMP_CreateCopy( input );
-    int width = BMP_GetWidth( input );
-    int height = BMP_GetHeight( input );
+    int width = input->width;
+    int height = input->height;
     int x;
     int y;
+
+    IMAGE_MODEL* output = create_image_model( width, height );
+
+    int y_offset = -1 * current_operator.y;
+    int x_offset = -1 * current_operator.x;
+    for( y = y_offset; y < height + y_offset; ++y )
+    {
+        for( x = x_offset; x < width + x_offset; ++x )
+        {
+            unsigned char r, g, b;
+
+            char condition = 0;
+            int i;
+            int j;
+            for( i = 0; i < 3; ++i )
+            {
+                for( j = 0; j < 3; ++j )
+                {
+                    if( x + j >= 0 && x + j < width &&
+                        y + i >= 0 && y + i < height &&
+                        current_operator.tab[ i ][ j ] )
+                    {
+                        if( input->data[ x + j ][ y + i ] )
+                        {
+                            condition = 1;
+                            break;
+                        }
+                    }
+                    else if( current_operator.tab[ i ][ j ] )
+                    {
+                        // pixels out of an image are empty
+                        condition = 1;
+                        break;
+                    }
+                }
+                if( condition )
+                    break;
+            }
+
+            if( x + current_operator.x >= 0 && x + current_operator.x < width &&
+                y + current_operator.y >= 0 && y + current_operator.y < height )
+            {
+                if( condition )
+                    output->data[ x + current_operator.x ][ y + current_operator.y ] = 255;
+                else
+                    output->data[ x + current_operator.x ][ y + current_operator.y ] = 0;
+            }
+        }
+    }
+
+    return output;
+}
+
+IMAGE_MODEL* dilatation( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
+{
+    MORPHOLOGICAL_OPERATOR current_operator = MORPHOLOGICAL_OPERATORS[ operator ];
+    int width = input->width;
+    int height = input->height;
+    int x;
+    int y;
+
+    IMAGE_MODEL* output = create_image_model( width, height );
 
     for( y = 0; y < height - 1; ++y )
     {
@@ -51,8 +103,7 @@ BMP* erosion( BMP* input, MORPH_OPERATOR_ENUM operator )
                 {
                     if( current_operator.tab[ i ][ j ] == 1 )
                     {
-                        BMP_GetPixelRGB( input, x + j, y + i, &r, &g, &b );
-                        if( GetPixelValue( r ) )
+                        if( !input->data[ x + j ][ y + i ] )
                         {
                             condition = 1;
                             break;
@@ -64,58 +115,16 @@ BMP* erosion( BMP* input, MORPH_OPERATOR_ENUM operator )
             }
 
             if( condition )
-                BMP_SetPixelRGB( output, x + current_operator.x, y + current_operator.y, 255, 255, 255 );
+                output->data[ x + current_operator.x ][ y + current_operator.y ] = 0;
+            else
+                output->data[ x + current_operator.x ][ y + current_operator.y ] = 255;
         }
     }
 
     return output;
 }
 
-BMP* dilatation( BMP* input, MORPH_OPERATOR_ENUM operator )
-{
-    MORPHOLOGICAL_OPERATOR current_operator = MORPHOLOGICAL_OPERATORS[ operator ];
-    BMP* output = BMP_CreateCopy( input );
-    int width = BMP_GetWidth( input );
-    int height = BMP_GetHeight( input );
-    int x;
-    int y;
-
-    for( y = 0; y < height - 1; ++y )
-    {
-        for( x = 0; x < width - 1; ++x )
-        {
-            unsigned char r, g, b;
-
-            char condition = 0;
-            int i;
-            int j;
-            for( i = 0; i < 3; ++i )
-            {
-                for ( j = 0; j < 3; ++j )
-                {
-                    if( current_operator.tab[ i ][ j ] == 1 )
-                    {
-                        BMP_GetPixelRGB( input, x + j, y + i, &r, &g, &b );
-                        if( !GetPixelValue( r ) )
-                        {
-                            condition = 1;
-                            break;
-                        }
-                    }
-                }
-                if( condition )
-                    break;
-            }
-
-            if( condition )
-                BMP_SetPixelRGB( output, x + current_operator.x, y + current_operator.y, 0, 0, 0 );
-        }
-    }
-
-    return output;
-}
-
-BMP* opening( BMP* input, MORPH_OPERATOR_ENUM operator )
+IMAGE_MODEL* opening( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
 {
     return dilatation( erosion( input, operator ), operator );
 }

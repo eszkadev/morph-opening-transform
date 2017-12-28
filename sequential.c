@@ -24,18 +24,23 @@ int main( int argc, char** argv )
     printf( "In: %s\nOut: %s\n", input_file, output_file );
 
     BMP* bmp;
-    BMP* out;
+    BMP* output_bmp;
+    IMAGE_MODEL* output;
 
     bmp = BMP_ReadFile( input_file );
     BMP_CHECK_ERROR( stderr, EXIT_ERROR );
 
-    out = opening( bmp, CROSS );
+    IMAGE_MODEL* input = bmp_to_image_model( bmp );
+    output = opening( input, CROSS );
 
-    BMP_WriteFile( out, output_file );
+    output_bmp = image_model_to_bmp( output );
+    BMP_WriteFile( output_bmp, output_file );
     BMP_CHECK_ERROR( stderr, EXIT_ERROR );
 
+    free_image_model( input );
+    free_image_model( output );
     BMP_Free( bmp );
-    BMP_Free( out );
+    BMP_Free( output_bmp );
 
     return 0;
 }
