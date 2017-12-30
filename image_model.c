@@ -6,7 +6,7 @@
 
 #include "image_model.h"
 #include <stdlib.h>
-
+#include <stdio.h>
 
 /* Normalize values */
 inline unsigned char _normalizePixelValue( unsigned char value )
@@ -148,4 +148,78 @@ int compare_models( IMAGE_MODEL* model1, IMAGE_MODEL* model2 )
     }
 
     return EQUALS;
+}
+
+void save_image_model( IMAGE_MODEL* model, char* path )
+{
+    FILE* file = fopen( path, "w" );
+
+    if( file )
+    {
+        unsigned int x, y;
+        unsigned int width = model->width;
+        unsigned int height = model->height;
+
+        fprintf( file, "%d %d\n", width, height );
+
+        for( y = 0; y < height; ++y )
+        {
+            for( x = 0; x < width; ++x )
+            {
+                if( model->data[ x ][ y ] )
+                    putc( '.', file );
+                else
+                    putc( 'X', file );
+            }
+            fprintf( file, "\n" );
+        }
+    }
+}
+
+IMAGE_MODEL* load_image_model( char* path )
+{
+    IMAGE_MODEL* model = NULL;
+
+    FILE* file = fopen( path, "r" );
+
+    if( file )
+    {
+        unsigned int width, height;
+        fscanf( file, "%u %u\n", &width, &height );
+
+        model = create_image_model( width, height );
+        unsigned char* line = (unsigned char*)malloc( sizeof( unsigned char ) * ( width + 1 ) );
+        unsigned int x, y;
+
+        for( y = 0; y < height; ++y )
+        {
+            if( fgets( line, width + 1, file ) != (char*)line )
+            {
+                free( line );
+                return NULL;
+            }
+
+            for( x = 0; x < width; ++x )
+            {
+                if( line[ x ] == '.' )
+                    model->data[ x ][ y ] = 255;
+                else if( line[ x ] == 'X' )
+                    model->data[ x ][ y ] = 0;
+                else
+                {
+                    fprintf( stderr, "Invalid file! contains: '%c' (%d) character at position [%d, %d].\n",
+                        line[ x ], (int)line[ x ], x, y );
+                    free( line );
+                    return NULL;
+                }
+            }
+
+            // new line
+            fgetc( file );
+        }
+
+        free( line );
+    }
+
+    return model;
 }

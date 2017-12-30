@@ -31,15 +31,17 @@ int main( int argc, char** argv )
     BMP_CHECK_ERROR( stderr, EXIT_ERROR );
 
     IMAGE_MODEL* input = bmp_to_image_model( bmp );
+    BMP_Free( bmp );
+
     output = opening( input, CROSS );
+    free_image_model( input );
 
     output_bmp = image_model_to_bmp( output );
+    free_image_model( output );
+
     BMP_WriteFile( output_bmp, output_file );
     BMP_CHECK_ERROR( stderr, EXIT_ERROR );
 
-    free_image_model( input );
-    free_image_model( output );
-    BMP_Free( bmp );
     BMP_Free( output_bmp );
 
     return 0;

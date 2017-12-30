@@ -23,9 +23,13 @@ generate_testcase: dependencies
 	$(CC) $(CC_FLAGS) generate_testcase.c image_model.c -o $(OUT)/generate_testcase -I$(INC) -L$(OUT) -lqdbmp
 
 test_data: generate_testcase
-	test -f `pwd`/test_data/2048.bmp || ./out/generate_testcase 2048 2048 `pwd`/test_data/2048.bmp
-	test -f `pwd`/test_data/4096.bmp || ./out/generate_testcase 4096 4096 `pwd`/test_data/4096.bmp
-	test -f `pwd`/test_data/8192.bmp || ./out/generate_testcase 8192 8192 `pwd`/test_data/8192.bmp
+	test -f `pwd`/test_data/2048.model || ./out/generate_testcase 2048 2048 `pwd`/test_data/2048.model
+	test -f `pwd`/test_data/4096.model || ./out/generate_testcase 4096 4096 `pwd`/test_data/4096.model
+	test -f `pwd`/test_data/8192.model || ./out/generate_testcase 8192 8192 `pwd`/test_data/8192.model
+	test -f `pwd`/test_data/16384.model || ./out/generate_testcase 16384 16384 `pwd`/test_data/16384.model
+	test -f `pwd`/test_data/32768.model || ./out/generate_testcase 32768 32768 `pwd`/test_data/32768.model
+	test -f `pwd`/test_data/48000.model || ./out/generate_testcase 48000 48000 `pwd`/test_data/48000.model
+	test -f `pwd`/test_data/56000.model || ./out/generate_testcase 56000 56000 `pwd`/test_data/56000.model
 
 dependencies: out_dir qdbmp
 

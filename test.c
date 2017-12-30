@@ -23,28 +23,33 @@ int64_t timespecDiff( struct timespec* time_a, struct timespec* time_b )
 #define TEST(name, operation, operator, file1, file2) \
 void name() { \
     printf( "%s ...\t", #name ); \
-    BMP* bmp1 = BMP_ReadFile( file1 ); \
-    BMP* bmp2; \
-    IMAGE_MODEL* model2; \
-    assert( bmp1 ); \
-    IMAGE_MODEL* model1 = bmp_to_image_model( bmp1 ); \
-    assert( model1 ); \
+    IMAGE_MODEL* model1; \
+    if( strstr( file1 + strlen( file1 ) - 4, "bmp" ) ) \
+    { \
+        BMP* bmp1 = BMP_ReadFile( file1 ); \
+        if( !bmp1 ) exit( EXIT_ERROR ); \
+        model1 = bmp_to_image_model( bmp1 ); \
+        BMP_Free( bmp1 ); \
+    } else \
+        model1 = load_image_model( file1 ); \
+    if( !model1 ) exit( EXIT_ERROR ); \
     /*print_model( model1 );*/ \
-    if( strlen( file2 ) ) { \
-        bmp2 = BMP_ReadFile( file2 ); \
-        assert( bmp2 ); \
-        model2 = bmp_to_image_model( bmp2 ); \
-        assert( model2 ); \
-        /*print_model( model2 );*/ \
-    } \
     struct timespec before, after; \
     clock_gettime( CLOCK_MONOTONIC, &before ); \
     IMAGE_MODEL* output_model = operation( model1, operator ); \
     clock_gettime( CLOCK_MONOTONIC, &after ); \
+    free_image_model( model1 ); \
     /*print_model( output_model );*/ \
-    assert( output_model ); \
+    if( !output_model ) exit( EXIT_ERROR ); \
     if( strlen( file2 ) ) { \
+        BMP* bmp2 = BMP_ReadFile( file2 ); \
+        if( !bmp2 ) exit( EXIT_ERROR ); \
+        IMAGE_MODEL* model2 = bmp_to_image_model( bmp2 ); \
+        BMP_Free( bmp2 ); \
+        if( !model2 ) exit( EXIT_ERROR ); \
+        /*print_model( model2 );*/ \
         int result = compare_models( output_model, model2 ); \
+        free_image_model( model2 ); \
         if( result == EQUALS ) printf( "OK" ); \
         else if( result == SIZE_DOESNT_MATCH ) printf( "Size doesn't match " ); \
         else if( result == CONTENT_IS_DIFFERENT ) ; \
@@ -53,16 +58,14 @@ void name() { \
             char* output_file = (char*)malloc( sizeof(char) * ( strlen( #name ) + 8 ) ); \
             sprintf( output_file, "%s%s.bmp", #name, "out" ); \
             BMP* out = image_model_to_bmp( output_model ); \
+            if( !out ) exit( EXIT_ERROR ); \
             BMP_WriteFile( out, output_file ); \
             BMP_Free( out ); \
+            free( output_file ); \
         } \
-        free_image_model( model2 ); \
-        BMP_Free( bmp2 ); \
     } \
     printf("\tTime: %lu ms\n", timespecDiff( &after, &before ) / 1000000L ); \
-    free_image_model( model1 ); \
     free_image_model( output_model ); \
-    BMP_Free( bmp1 ); \
 } \
 
 TEST( empty_3x3_erosion, erosion, CROSS, "test_data/3x3_empty.bmp", "test_data/3x3_empty.bmp" )
@@ -76,9 +79,13 @@ TEST( wiki1_erosion, erosion, SQUARE, "test_data/wiki_1.bmp", "test_data/wiki_1_
 TEST( wiki1_opening, opening, SQUARE, "test_data/wiki_1.bmp", "test_data/wiki_1_square_opening.bmp" )
 
 TEST( opening_1024, opening, SQUARE, "test_data/1024.bmp", "" )
-TEST( opening_2048, opening, SQUARE, "test_data/2048.bmp", "" )
-TEST( opening_4096, opening, SQUARE, "test_data/4096.bmp", "" )
-TEST( opening_8192, opening, SQUARE, "test_data/8192.bmp", "" )
+TEST( opening_2048, opening, SQUARE, "test_data/2048.model", "" )
+TEST( opening_4096, opening, SQUARE, "test_data/4096.model", "" )
+TEST( opening_8192, opening, SQUARE, "test_data/8192.model", "" )
+TEST( opening_16384, opening, SQUARE, "test_data/16384.model", "" )
+TEST( opening_32768, opening, SQUARE, "test_data/32768.model", "" )
+TEST( opening_48000, opening, SQUARE, "test_data/48000.model", "" )
+TEST( opening_56000, opening, SQUARE, "test_data/56000.model", "" )
 
 int main( int argc, char** argv )
 {
@@ -100,6 +107,10 @@ int main( int argc, char** argv )
     opening_2048();
     opening_4096();
     opening_8192();
+    opening_16384();
+    opening_32768();
+    opening_48000();
+    opening_56000();
 
     return 0;
 }

@@ -1,5 +1,8 @@
 out/*
-test_data/1024.bmp
-test_data/2048.bmp
-test_data/4096.bmp
-test_data/8192.bmp
+test_data/2048.model
+test_data/4096.model
+test_data/8192.model
+test_data/16384.model
+test_data/32768.model
+test_data/48000.model
+test_data/56000.model

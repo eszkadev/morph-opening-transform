@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <qdbmp.h>
 #include "image_model.h"
 
 #define EXIT_ERROR -1
@@ -26,18 +25,12 @@ int main( int argc, char** argv )
 
     printf( "Width: %d\nHeight: %d\nOut: %s\n", width, height, output_file );
 
-    BMP* output_bmp;
+    IMAGE_MODEL* model = create_image_model( width, height );
+    generate( model );
+    save_image_model( model, output_file );
 
-    IMAGE_MODEL* output = create_image_model( width, height );
-
-    generate( output );
-
-    output_bmp = image_model_to_bmp( output );
-    BMP_WriteFile( output_bmp, output_file );
-    BMP_CHECK_ERROR( stderr, EXIT_ERROR );
-
-    free_image_model( output );
-    BMP_Free( output_bmp );
+    free_image_model( model );
+    free( output_file );
 
     return 0;
 }
@@ -54,7 +47,7 @@ void parse_input( int argc, char** argv, unsigned int* width, unsigned int* heig
         sscanf( argv[ 1 ], "%d", width );
         sscanf( argv[ 2 ], "%d", height );
 
-        *output_file = (char*)malloc( strlen( argv[ 3 ] ) * sizeof( char ) );
+        *output_file = (char*)malloc( ( strlen( argv[ 3 ] ) + 1 ) * sizeof( char ) );
         strcpy( *output_file, argv[ 3 ] );
 
         char* dot_char = strchr( *output_file, '.' );
@@ -69,11 +62,10 @@ void parse_input( int argc, char** argv, unsigned int* width, unsigned int* heig
 void generate( IMAGE_MODEL* model )
 {
     unsigned int SECTION_SIZE = 4;
+    unsigned int threshold = 50;
 
     unsigned int width = model->width;
     unsigned int height = model->height;
-
-    unsigned int threshold = 50;
 
     unsigned int x, y, x_start, y_start;
     for( y_start = 0; y_start < height; y_start += SECTION_SIZE * 3 / 4 )
@@ -94,6 +86,7 @@ void generate( IMAGE_MODEL* model )
                 }
             }
         }
+
         SECTION_SIZE = rand() % 7 + 3;
     }
 }

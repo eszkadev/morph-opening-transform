@@ -25,3 +25,6 @@ void print_model( IMAGE_MODEL* model );
 
 IMAGE_MODEL * create_image_model( unsigned int width, unsigned int height );
 void free_image_model( IMAGE_MODEL* model );
+
+void save_image_model( IMAGE_MODEL* model, char* path );
+IMAGE_MODEL* load_image_model( char* path );
