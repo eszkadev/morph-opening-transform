@@ -5,7 +5,10 @@ QDBMP_PATH = qdbmp_1.0.0
 INC = $(QDBMP_PATH)
 OUT = out
 
-all: dependencies sequential basic_parallel test_sequential test_basic_parallel generate_testcase
+all: dependencies generate_testcase \
+	sequential test_sequential \
+	basic_parallel test_basic_parallel \
+	fsa_parallel test_fsa_parallel
 
 sequential: dependencies
 	$(CC) $(CC_FLAGS) main.c sequential_operations.c image_model.c -o $(OUT)/sequential -I$(INC) -L$(OUT) -lqdbmp
@@ -13,11 +16,17 @@ sequential: dependencies
 basic_parallel: dependencies
 	$(CC) $(CC_FLAGS) main.c basic_parallel_operations.c image_model.c -o $(OUT)/basic_parallel -I$(INC) -L$(OUT) -lqdbmp -fopenmp
 
+fsa_parallel: dependencies
+	$(CC) $(CC_FLAGS) main.c fsa_parallel_operations.c image_model.c -o $(OUT)/fsa_parallel -I$(INC) -L$(OUT) -lqdbmp -fopenmp
+
 test_sequential: sequential test_data
 	$(CC) $(CC_FLAGS) test.c image_model.c sequential_operations.c -o $(OUT)/test_sequential -I$(INC) -L$(OUT) -lqdbmp
 
 test_basic_parallel: basic_parallel test_data
 	$(CC) $(CC_FLAGS) test.c image_model.c basic_parallel_operations.c -o $(OUT)/test_basic_parallel -I$(INC) -L$(OUT) -lqdbmp -fopenmp
+
+test_fsa_parallel: fsa_parallel test_data
+	$(CC) $(CC_FLAGS) test.c image_model.c fsa_parallel_operations.c -o $(OUT)/test_fsa_parallel -I$(INC) -L$(OUT) -lqdbmp -fopenmp
 
 generate_testcase: dependencies
 	$(CC) $(CC_FLAGS) generate_testcase.c image_model.c -o $(OUT)/generate_testcase -I$(INC) -L$(OUT) -lqdbmp
