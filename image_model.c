@@ -34,7 +34,7 @@ IMAGE_MODEL* bmp_to_image_model( BMP* bmp )
         for( x = 0; x < width; ++x )
         {
             BMP_GetPixelRGB( bmp, x, y, &r, &g, &b );
-            model->data[ x ][ y ] = _normalizePixelValue( r );
+            model->data[ x + y * width ] = _normalizePixelValue( r );
         }
     }
 
@@ -57,7 +57,7 @@ BMP* image_model_to_bmp( IMAGE_MODEL* model )
     {
         for( x = 0; x < width; ++x )
         {
-            pixel = model->data[ x ][ y ];
+            pixel = model->data[ x + y * width ];
             BMP_SetPixelRGB( bmp, x, y, pixel, pixel, pixel );
         }
     }
@@ -68,20 +68,9 @@ BMP* image_model_to_bmp( IMAGE_MODEL* model )
 IMAGE_MODEL* create_image_model( unsigned int width, unsigned int height )
 {
     IMAGE_MODEL* model = (IMAGE_MODEL*)malloc( sizeof( IMAGE_MODEL ) );
-    unsigned char** data = (unsigned char**)malloc( sizeof( unsigned char* ) * width );
+    unsigned char* data = (unsigned char*)malloc( sizeof( unsigned char ) * width * height );
 
     unsigned int x;
-    for( x = 0; x < width; ++x )
-    {
-        data[ x ] = (unsigned char*)malloc( sizeof( unsigned char ) * height );
-#ifdef _DEBUG
-        unsigned int y;
-        for( y = 0; y < height; ++y )
-        {
-            data[ x ][ y ] = 55;
-        }
-#endif
-    }
 
     model->width = width;
     model->height = height;
@@ -95,11 +84,7 @@ void free_image_model( IMAGE_MODEL* model )
     unsigned int width = model->width;
     unsigned int x;
 
-    for( x = 0; x < width; ++x )
-    {
-        free( model->data[ x ] );
-    }
-
+    free( model->data );
     free( model );
 }
 
@@ -111,7 +96,7 @@ void print_model( IMAGE_MODEL* model )
     {
         for( y = 0; y < model->height; ++y )
         {
-            printf( model->data[ x ][ y ] ? "." : "X" );
+            printf( model->data[ x + y * model->width ] ? "." : "X" );
         }
         printf( "\n" );
     }
@@ -136,8 +121,8 @@ int compare_models( IMAGE_MODEL* model1, IMAGE_MODEL* model2 )
     {
         for( x = 0; x < width1; ++x )
         {
-            pixel1 = model1->data[ x ][ y ];
-            pixel2 = model2->data[ x ][ y ];
+            pixel1 = model1->data[ x + y * width1 ];
+            pixel2 = model2->data[ x + y * width2 ];
 
             if( pixel1 != pixel2 )
             {
@@ -166,7 +151,7 @@ void save_image_model( IMAGE_MODEL* model, char* path )
         {
             for( x = 0; x < width; ++x )
             {
-                if( model->data[ x ][ y ] )
+                if( model->data[ x + y * width ] )
                     putc( '.', file );
                 else
                     putc( 'X', file );
@@ -202,9 +187,9 @@ IMAGE_MODEL* load_image_model( char* path )
             for( x = 0; x < width; ++x )
             {
                 if( line[ x ] == '.' )
-                    model->data[ x ][ y ] = 255;
+                    model->data[ x + y * width ] = 255;
                 else if( line[ x ] == 'X' )
-                    model->data[ x ][ y ] = 0;
+                    model->data[ x + y * width ] = 0;
                 else
                 {
                     fprintf( stderr, "Invalid file! contains: '%c' (%d) character at position [%d, %d].\n",

@@ -10,7 +10,7 @@ typedef struct
 {
     unsigned int width;
     unsigned int height;
-    unsigned char** data;
+    unsigned char* data;
 } IMAGE_MODEL;
 
 #define EQUALS 0

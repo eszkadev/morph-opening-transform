@@ -70,6 +70,7 @@ void generate( IMAGE_MODEL* model )
     unsigned int x, y, x_start, y_start;
     for( y_start = 0; y_start < height; y_start += SECTION_SIZE * 3 / 4 )
     {
+        #pragma omp parallel_for
         for( x_start = 0; x_start < width; x_start += SECTION_SIZE * 3 / 4 )
         {
             threshold = rand() % 100;
@@ -80,9 +81,9 @@ void generate( IMAGE_MODEL* model )
                 {
                     int random = rand() % 100;
                     if( random >= threshold )
-                        model->data[ x ][ y ] = 0;
+                        model->data[ x + y * width ] = 0;
                     else
-                        model->data[ x ][ y ] = 255;
+                        model->data[ x + y * width ] = 255;
                 }
             }
         }

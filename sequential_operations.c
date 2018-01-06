@@ -49,7 +49,7 @@ IMAGE_MODEL* erosion( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
                         int correct_position = ( x + j >= 0 && x + j < width
                             && y + i >= 0 && y + i < height ) ? 1 : 0;
 
-                        if( correct_position && input->data[ x + j ][ y + i ] )
+                        if( correct_position && input->data[ x + j + ( y + i ) * width ] )
                         {
                             condition = 1;
                             break;
@@ -70,9 +70,9 @@ IMAGE_MODEL* erosion( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
                 y + current_operator.y >= 0 && y + current_operator.y < height )
             {
                 if( condition )
-                    output->data[ x + current_operator.x ][ y + current_operator.y ] = 255;
+                    output->data[ x + current_operator.x + ( y + current_operator.y ) * width ] = 255;
                 else
-                    output->data[ x + current_operator.x ][ y + current_operator.y ] = 0;
+                    output->data[ x + current_operator.x + ( y + current_operator.y ) * width ] = 0;
             }
         }
     }
@@ -109,7 +109,7 @@ IMAGE_MODEL* dilatation( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
                     {
                         if( x + j >= 0 && x + j < width &&
                             y + i >= 0 && y + i < height &&
-                            !input->data[ x + j ][ y + i ] )
+                            !input->data[ x + j + ( y + i ) * width ] )
                         {
                             condition = 1;
                             break;
@@ -124,9 +124,9 @@ IMAGE_MODEL* dilatation( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
                 y + current_operator.y >= 0 && y + current_operator.y < height )
             {
                 if( condition )
-                    output->data[ x + current_operator.x ][ y + current_operator.y ] = 0;
+                    output->data[ x + current_operator.x + ( y + current_operator.y ) * width ] = 0;
                 else
-                    output->data[ x + current_operator.x ][ y + current_operator.y ] = 255;
+                    output->data[ x + current_operator.x + ( y + current_operator.y ) * width ] = 255;
             }
         }
     }

@@ -1,5 +1,5 @@
 CC = gcc
-CC_FLAGS = -g
+CC_FLAGS = -g -lrt
 
 QDBMP_PATH = qdbmp_1.0.0
 INC = $(QDBMP_PATH)
@@ -29,7 +29,7 @@ test_fsa_parallel: fsa_parallel test_data
 	$(CC) $(CC_FLAGS) test.c image_model.c fsa_parallel_operations.c -o $(OUT)/test_fsa_parallel -I$(INC) -L$(OUT) -lqdbmp -fopenmp
 
 generate_testcase: dependencies
-	$(CC) $(CC_FLAGS) generate_testcase.c image_model.c -o $(OUT)/generate_testcase -I$(INC) -L$(OUT) -lqdbmp
+	$(CC) $(CC_FLAGS) generate_testcase.c image_model.c -o $(OUT)/generate_testcase -I$(INC) -L$(OUT) -lqdbmp -fopenmp
 
 test_data: generate_testcase
 	test -f `pwd`/test_data/2048.model || ./out/generate_testcase 2048 2048 `pwd`/test_data/2048.model
@@ -44,6 +44,7 @@ dependencies: out_dir qdbmp
 
 out_dir:
 	@mkdir -p out
+	@mkdir -p test_data
 
 qdbmp:
 	$(CC) $(QDBMP_PATH)/qdbmp.c -c -o $(OUT)/qdbmp.o
