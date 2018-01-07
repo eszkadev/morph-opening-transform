@@ -31,13 +31,24 @@ IMAGE_MODEL* erosion( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
 
     IMAGE_MODEL* output = create_image_model( width, height );
 
-    int y_begin = -1 * current_operator.y;
-    int x_begin = -1 * current_operator.x;
+    int cache_lines_per_row = width / CACHE_LINE_SIZE + 1;
+    int cache_lines = cache_lines_per_row * height;
+    int cache_line;
 
-    for( y = y_begin; y < height + y_begin; ++y )
+    int x_offset = current_operator.x;
+    int y_offset = current_operator.y;
+
+    unsigned char* input_data = input->data;
+    unsigned char* output_data = output->data;
+
+    #pragma omp parallel for shared(y_offset, x_offset, input_data, output_data, current_operator)
+    for( cache_line = 0; cache_line < cache_lines; ++cache_line )
     {
-        #pragma omp parallel for
-        for( x = x_begin; x < width + x_begin; ++x )
+        int x_begin = - x_offset + ( cache_line % cache_lines_per_row ) * CACHE_LINE_SIZE;
+        int y = - y_offset + cache_line / cache_lines_per_row;
+        int x;
+
+        for( x = x_begin; x < x_begin + CACHE_LINE_SIZE && x < width && y < height; ++x )
         {
             unsigned char r, g, b;
 
@@ -53,7 +64,7 @@ IMAGE_MODEL* erosion( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
                         int correct_position = ( x + j >= 0 && x + j < width
                             && y + i >= 0 && y + i < height ) ? 1 : 0;
 
-                        if( correct_position && input->data[ x + j + ( y + i ) * width ] )
+                        if( correct_position && input_data[ x + j + ( y + i ) * width ] )
                         {
                             condition = 1;
                             break;
@@ -74,9 +85,9 @@ IMAGE_MODEL* erosion( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
                 y + current_operator.y >= 0 && y + current_operator.y < height )
             {
                 if( condition )
-                    output->data[ x + current_operator.x + ( y + current_operator.y ) * width ] = 255;
+                    output_data[ x + current_operator.x + ( y + current_operator.y ) * width ] = 255;
                 else
-                    output->data[ x + current_operator.x + ( y + current_operator.y ) * width ] = 0;
+                    output_data[ x + current_operator.x + ( y + current_operator.y ) * width ] = 0;
             }
         }
     }
@@ -89,18 +100,27 @@ IMAGE_MODEL* dilatation( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
     MORPHOLOGICAL_OPERATOR current_operator = MORPHOLOGICAL_OPERATORS[ operator ];
     int width = input->width;
     int height = input->height;
-    int x;
-    int y;
 
     IMAGE_MODEL* output = create_image_model( width, height );
 
-    int y_begin = -1 * current_operator.y;
-    int x_begin = -1 * current_operator.x;
+    int cache_lines_per_row = width / CACHE_LINE_SIZE + 1;
+    int cache_lines = cache_lines_per_row * height;
+    int cache_line;
 
-    for( y = y_begin; y < height + y_begin; ++y )
+    int x_offset = current_operator.x;
+    int y_offset = current_operator.y;
+
+    unsigned char* input_data = input->data;
+    unsigned char* output_data = output->data;
+
+    #pragma omp parallel for shared(y_offset, x_offset, input_data, output_data, current_operator)
+    for( cache_line = 0; cache_line < cache_lines; ++cache_line )
     {
-        #pragma omp parallel for
-        for( x = x_begin; x < width + x_begin; ++x )
+        int x_begin = -x_offset + ( cache_line % cache_lines_per_row ) * CACHE_LINE_SIZE;
+        int y = -y_offset + cache_line / cache_lines_per_row;
+        int x;
+
+        for( x = x_begin; x < x_begin + CACHE_LINE_SIZE && x < width && y < height; ++x )
         {
             unsigned char r, g, b;
 
@@ -115,7 +135,7 @@ IMAGE_MODEL* dilatation( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
                     {
                         if( x + j >= 0 && x + j < width &&
                             y + i >= 0 && y + i < height &&
-                            !input->data[ x + j + ( y + i ) * width ] )
+                            !input_data[ x + j + ( y + i ) * width ] )
                         {
                             condition = 1;
                             break;
@@ -126,13 +146,13 @@ IMAGE_MODEL* dilatation( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
                     break;
             }
 
-            if( x + current_operator.x >= 0 && x + current_operator.x < width &&
-                y + current_operator.y >= 0 && y + current_operator.y < height )
+            if( x + x_offset >= 0 && x + x_offset < width &&
+                y + y_offset >= 0 && y + y_offset < height )
             {
                 if( condition )
-                    output->data[ x + current_operator.x + ( y + current_operator.y ) * width ] = 0;
+                    output_data[ x + x_offset + ( y + y_offset ) * width ] = 0;
                 else
-                    output->data[ x + current_operator.x + ( y + current_operator.y ) * width ] = 255;
+                    output_data[ x + x_offset + ( y + y_offset ) * width ] = 255;
             }
         }
     }
