@@ -32,10 +32,15 @@ IMAGE_MODEL* erosion( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
     int y_begin = -1 * current_operator.y;
     int x_begin = -1 * current_operator.x;
 
-    for( y = y_begin; y < height + y_begin; ++y )
+    unsigned char* input_data = input->data;
+    unsigned char* output_data = output->data;
+    #pragma offload target(mic) in(input_data:length(width*height)) \
+                            inout(output_data:length(width*height))
+
+    for( y = y_begin; y <= height - y_begin - 3; ++y )
     {
         #pragma omp parallel for
-        for( x = x_begin; x < width + x_begin; ++x )
+        for( x = x_begin; x <= width - x_begin - 3; ++x )
         {
             unsigned char r, g, b;
 
@@ -51,7 +56,7 @@ IMAGE_MODEL* erosion( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
                         int correct_position = ( x + j >= 0 && x + j < width
                             && y + i >= 0 && y + i < height ) ? 1 : 0;
 
-                        if( correct_position && input->data[ x + j + ( y + i ) * width ] )
+                        if( correct_position && input_data[ x + j + ( y + i ) * width ] )
                         {
                             condition = 1;
                             break;
@@ -72,9 +77,9 @@ IMAGE_MODEL* erosion( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
                 y + current_operator.y >= 0 && y + current_operator.y < height )
             {
                 if( condition )
-                    output->data[ x + current_operator.x + ( y + current_operator.y ) * width ] = 255;
+                    output_data[ x + current_operator.x + ( y + current_operator.y ) * width ] = 255;
                 else
-                    output->data[ x + current_operator.x + ( y + current_operator.y ) * width ] = 0;
+                    output_data[ x + current_operator.x + ( y + current_operator.y ) * width ] = 0;
             }
         }
     }
@@ -95,10 +100,15 @@ IMAGE_MODEL* dilatation( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
     int y_begin = -1 * current_operator.y;
     int x_begin = -1 * current_operator.x;
 
-    for( y = y_begin; y < height + y_begin; ++y )
+    unsigned char* input_data = input->data;
+    unsigned char* output_data = output->data;
+    #pragma offload target(mic) in(input_data:length(width*height)) \
+                            inout(output_data:length(width*height))
+
+    for( y = y_begin; y <= height - y_begin - 3; ++y )
     {
         #pragma omp parallel for
-        for( x = x_begin; x < width + x_begin; ++x )
+        for( x = x_begin; x <= width - x_begin - 3; ++x )
         {
             unsigned char r, g, b;
 
@@ -113,7 +123,7 @@ IMAGE_MODEL* dilatation( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
                     {
                         if( x + j >= 0 && x + j < width &&
                             y + i >= 0 && y + i < height &&
-                            !input->data[ x + j + ( y + i ) * width ] )
+                            !input_data[ x + j + ( y + i ) * width ] )
                         {
                             condition = 1;
                             break;
@@ -128,9 +138,9 @@ IMAGE_MODEL* dilatation( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
                 y + current_operator.y >= 0 && y + current_operator.y < height )
             {
                 if( condition )
-                    output->data[ x + current_operator.x + ( y + current_operator.y ) * width ] = 0;
+                    output_data[ x + current_operator.x + ( y + current_operator.y ) * width ] = 0;
                 else
-                    output->data[ x + current_operator.x + ( y + current_operator.y ) * width ] = 255;
+                    output_data[ x + current_operator.x + ( y + current_operator.y ) * width ] = 255;
             }
         }
     }

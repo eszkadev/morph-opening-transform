@@ -41,6 +41,8 @@ IMAGE_MODEL* erosion( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
     unsigned char* input_data = input->data;
     unsigned char* output_data = output->data;
 
+    #pragma offload target(mic) in(input_data:length(width*height)) \
+                                inout(output_data:length(width*height))
     #pragma omp parallel for shared(y_offset, x_offset, input_data, output_data, current_operator)
     for( cache_line = 0; cache_line < cache_lines; ++cache_line )
     {
@@ -48,7 +50,7 @@ IMAGE_MODEL* erosion( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
         int y = - y_offset + cache_line / cache_lines_per_row;
         int x;
 
-        for( x = x_begin; x < x_begin + CACHE_LINE_SIZE && x < width && y < height; ++x )
+        for( x = x_begin; x < x_begin + CACHE_LINE_SIZE && x <= width + x_offset - 3 && y <= height + y_offset - 3; ++x )
         {
             unsigned char r, g, b;
 
@@ -113,6 +115,8 @@ IMAGE_MODEL* dilatation( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
     unsigned char* input_data = input->data;
     unsigned char* output_data = output->data;
 
+    #pragma offload target(mic) in(input_data:length(width*height)) \
+                                inout(output_data:length(width*height))
     #pragma omp parallel for shared(y_offset, x_offset, input_data, output_data, current_operator)
     for( cache_line = 0; cache_line < cache_lines; ++cache_line )
     {
@@ -120,7 +124,7 @@ IMAGE_MODEL* dilatation( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
         int y = -y_offset + cache_line / cache_lines_per_row;
         int x;
 
-        for( x = x_begin; x < x_begin + CACHE_LINE_SIZE && x < width && y < height; ++x )
+        for( x = x_begin; x < x_begin + CACHE_LINE_SIZE && x <= width + x_offset - 3 && y <= height + y_offset - 3; ++x )
         {
             unsigned char r, g, b;
 
