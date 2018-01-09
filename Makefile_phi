@@ -10,8 +10,7 @@ all: dependencies generate_testcase \
 	sequential test_sequential \
 	basic_parallel_no_vec test_basic_parallel_no_vec \
         basic_parallel_def_vec test_basic_parallel_def_vec \
-        basic_parallel_fsa test_basic_parallel_fsa \
-	fsa_parallel test_fsa_parallel
+        basic_parallel_fsa test_basic_parallel_fsa
 
 sequential: dependencies
 	$(CC) $(CC_FLAGS) -no-vec main.c sequential_operations.c image_model.c -o $(OUT)/sequential -I$(INC) -L$(OUT) $(LIBRARY)
@@ -29,10 +28,6 @@ basic_parallel_fsa: dependencies
 	$(CC) $(CC_FLAGS) -no-vec main.c basic_parallel_fsa_operations.c image_model.c -o $(OUT)/basic_parallel_fsa -I$(INC) -L$(OUT) $(LIBRARY)
 	@echo ""
 
-fsa_parallel: dependencies
-	$(CC) $(CC_FLAGS) main.c fsa_parallel_operations.c image_model.c -o $(OUT)/fsa_parallel -I$(INC) -L$(OUT) $(LIBRARY)
-	@echo ""
-
 test_sequential: sequential test_data
 	$(CC) $(CC_FLAGS) -no-vec test.c image_model.c sequential_operations.c -o $(OUT)/test_sequential -I$(INC) -L$(OUT) $(LIBRARY)
 	@echo ""
@@ -47,10 +42,6 @@ test_basic_parallel_fsa: basic_parallel_fsa test_data
 
 test_basic_parallel_def_vec: basic_parallel_def_vec test_data
 	$(CC) $(CC_FLAGS) test.c image_model.c basic_parallel_operations.c -o $(OUT)/test_basic_parallel_def_vec -I$(INC) -L$(OUT) $(LIBRARY)
-	@echo ""
-
-test_fsa_parallel: fsa_parallel test_data
-	$(CC) $(CC_FLAGS) test.c image_model.c fsa_parallel_operations.c -o $(OUT)/test_fsa_parallel -I$(INC) -L$(OUT) $(LIBRARY)
 	@echo ""
 
 generate_testcase: dependencies
