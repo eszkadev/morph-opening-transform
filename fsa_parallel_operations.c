@@ -31,10 +31,6 @@ IMAGE_MODEL* erosion( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
 
     IMAGE_MODEL* output = create_image_model( width, height );
 
-    int cache_lines_per_row = width / CACHE_LINE_SIZE + 1;
-    int cache_lines = cache_lines_per_row * height;
-    int cache_line;
-
     int x_offset = current_operator.x;
     int y_offset = current_operator.y;
 
@@ -45,7 +41,7 @@ IMAGE_MODEL* erosion( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
 
     #pragma offload target(mic) in(input_data:length(width*height)) \
                                 inout(output_data:length(width*height))
-    #pragma omp parallel for schedule(dynamic, 64) \
+    #pragma omp parallel for schedule(dynamic, CACHE_LINE_SIZE) \
         shared(y_offset, x_offset, input_data, output_data, current_operator)
     for( it = 0; it <= width * height; ++it )
     {
@@ -104,10 +100,6 @@ IMAGE_MODEL* dilatation( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
 
     IMAGE_MODEL* output = create_image_model( width, height );
 
-    int cache_lines_per_row = width / CACHE_LINE_SIZE + 1;
-    int cache_lines = cache_lines_per_row * height;
-    int cache_line;
-
     int x_offset = current_operator.x;
     int y_offset = current_operator.y;
 
@@ -118,7 +110,7 @@ IMAGE_MODEL* dilatation( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
 
     #pragma offload target(mic) in(input_data:length(width*height)) \
                                 inout(output_data:length(width*height))
-    #pragma omp parallel for schedule(dynamic, 64) \
+    #pragma omp parallel for schedule(dynamic, CACHE_LINE_SIZE) \
         shared(y_offset, x_offset, input_data, output_data, current_operator)
     for( it = 0; it <= width * height; ++it )
     {
