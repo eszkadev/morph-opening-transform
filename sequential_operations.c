@@ -39,9 +39,9 @@ IMAGE_MODEL* erosion( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
                                 inout(output_data:length(width*height))
     #pragma omp parallel
     #pragma omp single
-    for( y = y_begin; y < height + y_begin; ++y )
+    for( y = y_begin; y <= height - y_begin - 3; ++y )
     {
-        for( x = x_begin; x < width + x_begin; ++x )
+        for( x = x_begin; x <= width - x_begin - 3; ++x )
         {
             unsigned char r, g, b;
 
@@ -108,9 +108,9 @@ IMAGE_MODEL* dilatation( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
                                 inout(output_data:length(width*height))
     #pragma omp parallel
     #pragma omp single
-    for( y = y_begin; y < height + y_begin; ++y )
+    for( y = y_begin; y <= height - y_begin - 3; ++y )
     {
-        for( x = x_begin; x < width + x_begin; ++x )
+        for( x = x_begin; x <= width - x_begin - 3; ++x )
         {
             unsigned char r, g, b;
 
