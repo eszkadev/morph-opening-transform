@@ -67,8 +67,9 @@ BMP* image_model_to_bmp( IMAGE_MODEL* model )
 
 IMAGE_MODEL* create_image_model( unsigned int width, unsigned int height )
 {
+    unsigned long long int size = width * height;
     IMAGE_MODEL* model = (IMAGE_MODEL*)malloc( sizeof( IMAGE_MODEL ) );
-    unsigned char* data = (unsigned char*)malloc( sizeof( unsigned char ) * width * height );
+    unsigned char* data = (unsigned char*)malloc( sizeof( unsigned char ) * size );
 
     unsigned int x;
 
@@ -81,9 +82,6 @@ IMAGE_MODEL* create_image_model( unsigned int width, unsigned int height )
 
 void free_image_model( IMAGE_MODEL* model )
 {
-    unsigned int width = model->width;
-    unsigned int x;
-
     free( model->data );
     free( model );
 }

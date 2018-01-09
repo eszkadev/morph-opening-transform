@@ -24,8 +24,10 @@ static const MORPHOLOGICAL_OPERATOR MORPHOLOGICAL_OPERATORS[] =
 IMAGE_MODEL* erosion( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
 {
     MORPHOLOGICAL_OPERATOR current_operator = MORPHOLOGICAL_OPERATORS[ operator ];
-    int width = input->width;
-    int height = input->height;
+    unsigned int width = input->width;
+    unsigned int height = input->height;
+    unsigned long long int size = width * height;
+
     int x;
     int y;
 
@@ -37,12 +39,12 @@ IMAGE_MODEL* erosion( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
     unsigned char* input_data = input->data;
     unsigned char* output_data = output->data;
 
-    int it;
+    unsigned long long int it;
 
-    #pragma offload target(mic) in(input_data:length(width*height)) \
-                                out(output_data:length(width*height))
+    #pragma offload target(mic) in(input_data:length(size)) \
+                                out(output_data:length(size))
     #pragma omp parallel for schedule(static, CACHE_LINE_SIZE)
-    for( it = 0; it < width * height; ++it )
+    for( it = 0; it < size; ++it )
     {
         int x = it % width - x_offset;
         int y = it / width - y_offset;
@@ -90,8 +92,9 @@ IMAGE_MODEL* erosion( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
 IMAGE_MODEL* dilatation( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
 {
     MORPHOLOGICAL_OPERATOR current_operator = MORPHOLOGICAL_OPERATORS[ operator ];
-    int width = input->width;
-    int height = input->height;
+    unsigned int width = input->width;
+    unsigned int height = input->height;
+    unsigned long long int size = width * height;
 
     IMAGE_MODEL* output = create_image_model( width, height );
 
@@ -101,12 +104,12 @@ IMAGE_MODEL* dilatation( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
     unsigned char* input_data = input->data;
     unsigned char* output_data = output->data;
 
-    int it;
+    unsigned long long int it;
 
-    #pragma offload target(mic) in(input_data:length(width*height)) \
-                                out(output_data:length(width*height))
+    #pragma offload target(mic) in(input_data:length(size)) \
+                                out(output_data:length(size))
     #pragma omp parallel for schedule(static, CACHE_LINE_SIZE)
-    for( it = 0; it < width * height; ++it )
+    for( it = 0; it < size; ++it )
     {
         int x = it % width - x_offset;
         int y = it / width - y_offset;
