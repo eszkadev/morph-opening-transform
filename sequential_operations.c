@@ -41,7 +41,7 @@ IMAGE_MODEL* erosion( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
                                 inout(output_data:length(width*height))
     #pragma omp parallel
     #pragma omp single
-    for( it = 0; it <= width * height; ++it )
+    for( it = 0; it < width * height; ++it )
     {
         int x = it % width - x_offset;
         int y = it / width - y_offset;
@@ -77,14 +77,10 @@ IMAGE_MODEL* erosion( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
                 break;
         }
 
-        if( x + current_operator.x >= 0 && x + current_operator.x < width &&
-            y + current_operator.y >= 0 && y + current_operator.y < height )
-        {
-            if( condition )
-                output_data[ x + current_operator.x + ( y + current_operator.y ) * width ] = 255;
-            else
-                output_data[ x + current_operator.x + ( y + current_operator.y ) * width ] = 0;
-        }
+        if( condition )
+            output_data[ it ] = 255;
+        else
+            output_data[ it ] = 0;
     }
 
     return output;
@@ -110,7 +106,7 @@ IMAGE_MODEL* dilatation( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
                                 inout(output_data:length(width*height))
     #pragma omp parallel
     #pragma omp single
-    for( it = 0; it <= width * height; ++it )
+    for( it = 0; it < width * height; ++it )
     {
         int x = it % width - x_offset;
         int y = it / width - y_offset;
@@ -139,14 +135,10 @@ IMAGE_MODEL* dilatation( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
                 break;
         }
 
-        if( x + x_offset >= 0 && x + x_offset < width &&
-            y + y_offset >= 0 && y + y_offset < height )
-        {
-            if( condition )
-                output_data[ x + x_offset + ( y + y_offset ) * width ] = 0;
-            else
-                output_data[ x + x_offset + ( y + y_offset ) * width ] = 255;
-        }
+        if( condition )
+            output_data[ it ] = 0;
+        else
+            output_data[ it ] = 255;
     }
 
     return output;
