@@ -41,56 +41,55 @@ IMAGE_MODEL* erosion( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
     unsigned char* input_data = input->data;
     unsigned char* output_data = output->data;
 
+    int it;
+
     #pragma offload target(mic) in(input_data:length(width*height)) \
                                 inout(output_data:length(width*height))
-    #pragma omp parallel for shared(y_offset, x_offset, input_data, output_data, current_operator)
-    for( cache_line = 0; cache_line < cache_lines; ++cache_line )
+    #pragma omp parallel for schedule(dynamic, 64) \
+        shared(y_offset, x_offset, input_data, output_data, current_operator)
+    for( it = 0; it <= width * height; ++it )
     {
-        int x_begin = - x_offset + ( cache_line % cache_lines_per_row ) * CACHE_LINE_SIZE;
-        int y = - y_offset + cache_line / cache_lines_per_row;
-        int x;
+        int x = it % width - x_offset;
+        int y = it / width - y_offset;
 
-        for( x = x_begin; x < x_begin + CACHE_LINE_SIZE && x <= width + x_offset - 3 && y <= height + y_offset - 3; ++x )
+        unsigned char r, g, b;
+
+        char condition = 0;
+        int i;
+        int j;
+        for( i = 0; i < 3; ++i )
         {
-            unsigned char r, g, b;
-
-            char condition = 0;
-            int i;
-            int j;
-            for( i = 0; i < 3; ++i )
+            for( j = 0; j < 3; ++j )
             {
-                for( j = 0; j < 3; ++j )
+                if( current_operator.tab[ i ][ j ] )
                 {
-                    if( current_operator.tab[ i ][ j ] )
-                    {
-                        int correct_position = ( x + j >= 0 && x + j < width
-                            && y + i >= 0 && y + i < height ) ? 1 : 0;
+                    int correct_position = ( x + j >= 0 && x + j < width
+                        && y + i >= 0 && y + i < height ) ? 1 : 0;
 
-                        if( correct_position && input_data[ x + j + ( y + i ) * width ] )
-                        {
-                            condition = 1;
-                            break;
-                        }
-                        else if( !correct_position )
-                        {
-                            // pixels out of an image are empty
-                            condition = 1;
-                            break;
-                        }
+                    if( correct_position && input_data[ x + j + ( y + i ) * width ] )
+                    {
+                        condition = 1;
+                        break;
+                    }
+                    else if( !correct_position )
+                    {
+                        // pixels out of an image are empty
+                        condition = 1;
+                        break;
                     }
                 }
-                if( condition )
-                    break;
             }
+            if( condition )
+                break;
+        }
 
-            if( x + current_operator.x >= 0 && x + current_operator.x < width &&
-                y + current_operator.y >= 0 && y + current_operator.y < height )
-            {
-                if( condition )
-                    output_data[ x + current_operator.x + ( y + current_operator.y ) * width ] = 255;
-                else
-                    output_data[ x + current_operator.x + ( y + current_operator.y ) * width ] = 0;
-            }
+        if( x + current_operator.x >= 0 && x + current_operator.x < width &&
+            y + current_operator.y >= 0 && y + current_operator.y < height )
+        {
+            if( condition )
+                output_data[ x + current_operator.x + ( y + current_operator.y ) * width ] = 255;
+            else
+                output_data[ x + current_operator.x + ( y + current_operator.y ) * width ] = 0;
         }
     }
 
@@ -115,49 +114,48 @@ IMAGE_MODEL* dilatation( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
     unsigned char* input_data = input->data;
     unsigned char* output_data = output->data;
 
+    int it;
+
     #pragma offload target(mic) in(input_data:length(width*height)) \
                                 inout(output_data:length(width*height))
-    #pragma omp parallel for shared(y_offset, x_offset, input_data, output_data, current_operator)
-    for( cache_line = 0; cache_line < cache_lines; ++cache_line )
+    #pragma omp parallel for schedule(dynamic, 64) \
+        shared(y_offset, x_offset, input_data, output_data, current_operator)
+    for( it = 0; it <= width * height; ++it )
     {
-        int x_begin = -x_offset + ( cache_line % cache_lines_per_row ) * CACHE_LINE_SIZE;
-        int y = -y_offset + cache_line / cache_lines_per_row;
-        int x;
+        int x = it % width - x_offset;
+        int y = it / width - y_offset;
 
-        for( x = x_begin; x < x_begin + CACHE_LINE_SIZE && x <= width + x_offset - 3 && y <= height + y_offset - 3; ++x )
+        unsigned char r, g, b;
+
+        char condition = 0;
+        int i;
+        int j;
+        for( i = 0; i < 3; ++i )
         {
-            unsigned char r, g, b;
-
-            char condition = 0;
-            int i;
-            int j;
-            for( i = 0; i < 3; ++i )
+            for( j = 0; j < 3; ++j )
             {
-                for( j = 0; j < 3; ++j )
+                if( current_operator.tab[ i ][ j ] )
                 {
-                    if( current_operator.tab[ i ][ j ] )
+                    if( x + j >= 0 && x + j < width &&
+                        y + i >= 0 && y + i < height &&
+                        !input_data[ x + j + ( y + i ) * width ] )
                     {
-                        if( x + j >= 0 && x + j < width &&
-                            y + i >= 0 && y + i < height &&
-                            !input_data[ x + j + ( y + i ) * width ] )
-                        {
-                            condition = 1;
-                            break;
-                        }
+                        condition = 1;
+                        break;
                     }
                 }
-                if( condition )
-                    break;
             }
+            if( condition )
+                break;
+        }
 
-            if( x + x_offset >= 0 && x + x_offset < width &&
-                y + y_offset >= 0 && y + y_offset < height )
-            {
-                if( condition )
-                    output_data[ x + x_offset + ( y + y_offset ) * width ] = 0;
-                else
-                    output_data[ x + x_offset + ( y + y_offset ) * width ] = 255;
-            }
+        if( x + x_offset >= 0 && x + x_offset < width &&
+            y + y_offset >= 0 && y + y_offset < height )
+        {
+            if( condition )
+                output_data[ x + x_offset + ( y + y_offset ) * width ] = 0;
+            else
+                output_data[ x + x_offset + ( y + y_offset ) * width ] = 255;
         }
     }
 
