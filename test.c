@@ -35,9 +35,12 @@ void name() { \
     if( !model1 ) exit( EXIT_ERROR ); \
     /*print_model( model1 );*/ \
     struct timespec before, after; \
+    IMAGE_MODEL* temp = create_image_model( model1->width, model1->height ); \
+    IMAGE_MODEL* output_model = create_image_model( model1->width, model1->height ); \
     clock_gettime( CLOCK_MONOTONIC, &before ); \
-    IMAGE_MODEL* output_model = operation( model1, operator ); \
+    operation( model1, output_model, operator, temp ); \
     clock_gettime( CLOCK_MONOTONIC, &after ); \
+    free_image_model( temp ); \
     free_image_model( model1 ); \
     /*print_model( output_model );*/ \
     if( !output_model ) exit( EXIT_ERROR ); \
@@ -103,13 +106,13 @@ int main( int argc, char** argv )
 
     printf( "=========== Performance testing ===========\n" );
 
-    opening_1024();
-    opening_2048();
-    opening_4096();
-    opening_8192();
+    //opening_1024();
+    //opening_2048();
+    //opening_4096();
+    //opening_8192();
     opening_16384();
-    opening_32768();
-    opening_48000();
+    //opening_32768();
+    //opening_48000();
     opening_56000();
 
     return 0;

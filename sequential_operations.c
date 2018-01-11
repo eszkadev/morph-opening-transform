@@ -19,7 +19,7 @@ static const MORPHOLOGICAL_OPERATOR MORPHOLOGICAL_OPERATORS[] =
     { 1, 1, { 1, 1, 1, 1, 1, 1, 1, 1, 1 } },
 };
 
-IMAGE_MODEL* erosion( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
+void erosion( IMAGE_MODEL* input, IMAGE_MODEL* output, MORPH_OPERATOR_ENUM operator, IMAGE_MODEL* temp )
 {
     MORPHOLOGICAL_OPERATOR current_operator = MORPHOLOGICAL_OPERATORS[ operator ];
     unsigned int width = input->width;
@@ -28,8 +28,6 @@ IMAGE_MODEL* erosion( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
 
     int x;
     int y;
-
-    IMAGE_MODEL* output = create_image_model( width, height );
 
     int x_offset = current_operator.x;
     int y_offset = current_operator.y;
@@ -84,18 +82,14 @@ IMAGE_MODEL* erosion( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
         else
             output_data[ it ] = 0;
     }
-
-    return output;
 }
 
-IMAGE_MODEL* dilatation( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
+void dilatation( IMAGE_MODEL* input, IMAGE_MODEL* output, MORPH_OPERATOR_ENUM operator, IMAGE_MODEL* temp )
 {
     MORPHOLOGICAL_OPERATOR current_operator = MORPHOLOGICAL_OPERATORS[ operator ];
     unsigned int width = input->width;
     unsigned int height = input->height;
     unsigned long long int size = width * height;
-
-    IMAGE_MODEL* output = create_image_model( width, height );
 
     int x_offset = current_operator.x;
     int y_offset = current_operator.y;
@@ -143,11 +137,13 @@ IMAGE_MODEL* dilatation( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
         else
             output_data[ it ] = 255;
     }
-
-    return output;
 }
 
-IMAGE_MODEL* opening( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator )
+void opening( IMAGE_MODEL* input, IMAGE_MODEL* output, MORPH_OPERATOR_ENUM operator, IMAGE_MODEL* temp )
 {
-    return dilatation( erosion( input, operator ), operator );
+    if( temp == NULL )
+        temp = create_image_model( input->width, input->height );
+
+    erosion( input, temp, operator, NULL );
+    dilatation( temp, output, operator, NULL );
 }

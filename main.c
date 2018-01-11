@@ -33,8 +33,11 @@ int main( int argc, char** argv )
     IMAGE_MODEL* input = bmp_to_image_model( bmp );
     BMP_Free( bmp );
 
-    output = opening( input, CROSS );
+    output = create_image_model( input->width, input->height );
+    IMAGE_MODEL* temp = create_image_model( input->width, input->height );
+    opening( input, output, CROSS, temp );
     free_image_model( input );
+    free_image_model( temp );
 
     output_bmp = image_model_to_bmp( output );
     free_image_model( output );

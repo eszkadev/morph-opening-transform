@@ -14,6 +14,6 @@ typedef enum
     SQUARE = 1,
 } MORPH_OPERATOR_ENUM;
 
-IMAGE_MODEL* erosion( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator );
-IMAGE_MODEL* dilatation( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator );
-IMAGE_MODEL* opening( IMAGE_MODEL* input, MORPH_OPERATOR_ENUM operator );
+void erosion( IMAGE_MODEL* input, IMAGE_MODEL* output, MORPH_OPERATOR_ENUM operator, IMAGE_MODEL* temp );
+void dilatation( IMAGE_MODEL* input, IMAGE_MODEL* output, MORPH_OPERATOR_ENUM operator, IMAGE_MODEL* temp );
+void opening( IMAGE_MODEL* input, IMAGE_MODEL* output, MORPH_OPERATOR_ENUM operator, IMAGE_MODEL* temp );
