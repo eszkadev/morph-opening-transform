@@ -19,7 +19,7 @@ static const MORPHOLOGICAL_OPERATOR MORPHOLOGICAL_OPERATORS[] =
     { 1, 1, { 1, 1, 1, 1, 1, 1, 1, 1, 1 } },
 };
 
-void erosion( IMAGE_MODEL* input, IMAGE_MODEL* output, MORPH_OPERATOR_ENUM operator, IMAGE_MODEL* temp )
+void erosion( IMAGE_MODEL* input, IMAGE_MODEL* output, MORPH_OPERATOR_ENUM operator )
 {
     MORPHOLOGICAL_OPERATOR current_operator = MORPHOLOGICAL_OPERATORS[ operator ];
     unsigned int width = input->width;
@@ -37,8 +37,6 @@ void erosion( IMAGE_MODEL* input, IMAGE_MODEL* output, MORPH_OPERATOR_ENUM opera
 
     unsigned long long int it;
 
-    #pragma offload target(mic) in(input_data:length(size)) \
-                                inout(output_data:length(size))
     #pragma omp parallel
     #pragma omp single
     for( it = 0; it < size; ++it )
@@ -84,7 +82,7 @@ void erosion( IMAGE_MODEL* input, IMAGE_MODEL* output, MORPH_OPERATOR_ENUM opera
     }
 }
 
-void dilatation( IMAGE_MODEL* input, IMAGE_MODEL* output, MORPH_OPERATOR_ENUM operator, IMAGE_MODEL* temp )
+void dilatation( IMAGE_MODEL* input, IMAGE_MODEL* output, MORPH_OPERATOR_ENUM operator )
 {
     MORPHOLOGICAL_OPERATOR current_operator = MORPHOLOGICAL_OPERATORS[ operator ];
     unsigned int width = input->width;
@@ -99,8 +97,6 @@ void dilatation( IMAGE_MODEL* input, IMAGE_MODEL* output, MORPH_OPERATOR_ENUM op
 
     unsigned long long int it;
 
-    #pragma offload target(mic) in(input_data:length(size)) \
-                                inout(output_data:length(size))
     #pragma omp parallel
     #pragma omp single
     for( it = 0; it < size; ++it )
@@ -139,11 +135,10 @@ void dilatation( IMAGE_MODEL* input, IMAGE_MODEL* output, MORPH_OPERATOR_ENUM op
     }
 }
 
-void opening( IMAGE_MODEL* input, IMAGE_MODEL* output, MORPH_OPERATOR_ENUM operator, IMAGE_MODEL* temp )
+void opening( IMAGE_MODEL* input, IMAGE_MODEL* output, MORPH_OPERATOR_ENUM operator )
 {
-    if( temp == NULL )
-        temp = create_image_model( input->width, input->height );
+    IMAGE_MODEL* temp = create_image_model( input->width, input->height );
 
-    erosion( input, temp, operator, NULL );
-    dilatation( temp, output, operator, NULL );
+    erosion( input, temp, operator );
+    dilatation( temp, output, operator );
 }

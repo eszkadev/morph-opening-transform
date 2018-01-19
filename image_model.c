@@ -68,8 +68,8 @@ BMP* image_model_to_bmp( IMAGE_MODEL* model )
 IMAGE_MODEL* create_image_model( unsigned int width, unsigned int height )
 {
     unsigned long long int size = width * height;
-    IMAGE_MODEL* model = (IMAGE_MODEL*)malloc( sizeof( IMAGE_MODEL ) );
-    unsigned char* data = (unsigned char*)malloc( sizeof( unsigned char ) * size );
+    IMAGE_MODEL* model = (IMAGE_MODEL*)_mm_malloc( sizeof( IMAGE_MODEL ), 64 );
+    unsigned char* data = (unsigned char*)_mm_malloc( sizeof( unsigned char ) * size, 64 );
 
     unsigned int x;
 
@@ -82,8 +82,8 @@ IMAGE_MODEL* create_image_model( unsigned int width, unsigned int height )
 
 void free_image_model( IMAGE_MODEL* model )
 {
-    free( model->data );
-    free( model );
+    _mm_free( model->data );
+    _mm_free( model );
 }
 
 void print_model( IMAGE_MODEL* model )
@@ -171,14 +171,14 @@ IMAGE_MODEL* load_image_model( char* path )
         fscanf( file, "%u %u\n", &width, &height );
 
         model = create_image_model( width, height );
-        unsigned char* line = (unsigned char*)malloc( sizeof( unsigned char ) * ( width + 1 ) );
+        unsigned char* line = (unsigned char*)_mm_malloc( sizeof( unsigned char ) * ( width + 1 ), 64 );
         unsigned int x, y;
 
         for( y = 0; y < height; ++y )
         {
             if( fgets( line, width + 1, file ) != (char*)line )
             {
-                free( line );
+                _mm_free( line );
                 return NULL;
             }
 
@@ -192,7 +192,7 @@ IMAGE_MODEL* load_image_model( char* path )
                 {
                     fprintf( stderr, "Invalid file! contains: '%c' (%d) character at position [%d, %d].\n",
                         line[ x ], (int)line[ x ], x, y );
-                    free( line );
+                    _mm_free( line );
                     return NULL;
                 }
             }
@@ -201,7 +201,7 @@ IMAGE_MODEL* load_image_model( char* path )
             fgetc( file );
         }
 
-        free( line );
+        _mm_free( line );
     }
 
     return model;

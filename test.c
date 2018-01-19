@@ -35,12 +35,10 @@ void name() { \
     if( !model1 ) exit( EXIT_ERROR ); \
     /*print_model( model1 );*/ \
     struct timespec before, after; \
-    IMAGE_MODEL* temp = create_image_model( model1->width, model1->height ); \
     IMAGE_MODEL* output_model = create_image_model( model1->width, model1->height ); \
     clock_gettime( CLOCK_MONOTONIC, &before ); \
-    operation( model1, output_model, operator, temp ); \
+    operation( model1, output_model, operator ); \
     clock_gettime( CLOCK_MONOTONIC, &after ); \
-    free_image_model( temp ); \
     free_image_model( model1 ); \
     /*print_model( output_model );*/ \
     if( !output_model ) exit( EXIT_ERROR ); \
@@ -82,13 +80,9 @@ TEST( wiki1_erosion, erosion, SQUARE, "test_data/wiki_1.bmp", "test_data/wiki_1_
 TEST( wiki1_opening, opening, SQUARE, "test_data/wiki_1.bmp", "test_data/wiki_1_square_opening.bmp" )
 
 TEST( opening_1024, opening, SQUARE, "test_data/1024.bmp", "" )
-TEST( opening_2048, opening, SQUARE, "test_data/2048.model", "" )
-TEST( opening_4096, opening, SQUARE, "test_data/4096.model", "" )
 TEST( opening_8192, opening, SQUARE, "test_data/8192.model", "" )
 TEST( opening_16384, opening, SQUARE, "test_data/16384.model", "" )
 TEST( opening_32768, opening, SQUARE, "test_data/32768.model", "" )
-TEST( opening_48000, opening, SQUARE, "test_data/48000.model", "" )
-TEST( opening_56000, opening, SQUARE, "test_data/56000.model", "" )
 
 int main( int argc, char** argv )
 {
@@ -106,14 +100,10 @@ int main( int argc, char** argv )
 
     printf( "=========== Performance testing ===========\n" );
 
-    //opening_1024();
-    //opening_2048();
-    //opening_4096();
-    //opening_8192();
+    opening_1024();
+    opening_8192();
     opening_16384();
-    //opening_32768();
-    //opening_48000();
-    opening_56000();
+    opening_32768();
 
     return 0;
 }

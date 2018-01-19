@@ -1,4 +1,5 @@
 CC = icc
+MMIC = -mmic
 CC_FLAGS = -lrt -vec-report3 -O2
 LIBRARY = -lqdbmp -fopenmp
 
@@ -9,53 +10,51 @@ OUT = out
 all: dependencies generate_testcase \
 	sequential test_sequential \
 	basic_parallel_no_vec test_basic_parallel_no_vec \
-        basic_parallel_def_vec test_basic_parallel_def_vec \
-        basic_parallel_fsa test_basic_parallel_fsa
+	basic_parallel_def_vec test_basic_parallel_def_vec \
+	basic_parallel_fsa test_basic_parallel_fsa
 
 sequential: dependencies
-	$(CC) $(CC_FLAGS) -no-vec main.c sequential_operations.c image_model.c -o $(OUT)/sequential -I$(INC) -L$(OUT) $(LIBRARY)
+	$(CC) $(CC_FLAGS) $(MMIC) -no-vec main.c sequential_operations.c image_model.c -o $(OUT)/sequential -I$(INC) -L$(OUT) $(LIBRARY)
 	@echo ""
 
 basic_parallel_no_vec: dependencies
-	$(CC) $(CC_FLAGS) -no-vec main.c basic_parallel_operations.c image_model.c -o $(OUT)/basic_parallel_no_vec -I$(INC) -L$(OUT) $(LIBRARY)
+	$(CC) $(CC_FLAGS) $(MMIC) -no-vec main.c basic_parallel_operations.c image_model.c -o $(OUT)/basic_parallel_no_vec -I$(INC) -L$(OUT) $(LIBRARY)
 	@echo ""
 
 basic_parallel_def_vec: dependencies
-	$(CC) $(CC_FLAGS) main.c basic_parallel_operations.c image_model.c -o $(OUT)/basic_parallel_def_vec -I$(INC) -L$(OUT) $(LIBRARY)
+	$(CC) $(CC_FLAGS) $(MMIC) main.c basic_parallel_operations.c image_model.c -o $(OUT)/basic_parallel_def_vec -I$(INC) -L$(OUT) $(LIBRARY)
 	@echo ""
 
 basic_parallel_fsa: dependencies
-	$(CC) $(CC_FLAGS) -no-vec main.c basic_parallel_fsa_operations.c image_model.c -o $(OUT)/basic_parallel_fsa -I$(INC) -L$(OUT) $(LIBRARY)
+	$(CC) $(CC_FLAGS) $(MMIC) -no-vec main.c basic_parallel_fsa_operations.c image_model.c -o $(OUT)/basic_parallel_fsa -I$(INC) -L$(OUT) $(LIBRARY)
 	@echo ""
 
+
 test_sequential: sequential test_data
-	$(CC) $(CC_FLAGS) -no-vec test.c image_model.c sequential_operations.c -o $(OUT)/test_sequential -I$(INC) -L$(OUT) $(LIBRARY)
+	$(CC) $(CC_FLAGS) $(MMIC) -no-vec test.c image_model.c sequential_operations.c -o $(OUT)/test_sequential -I$(INC) -L$(OUT) $(LIBRARY)
 	@echo ""
 
 test_basic_parallel_no_vec: basic_parallel_no_vec test_data
-	$(CC) $(CC_FLAGS) -no-vec test.c image_model.c basic_parallel_operations.c -o $(OUT)/test_basic_parallel_no_vec -I$(INC) -L$(OUT) $(LIBRARY)
+	$(CC) $(CC_FLAGS) $(MMIC) -no-vec test.c image_model.c basic_parallel_operations.c -o $(OUT)/test_basic_parallel_no_vec -I$(INC) -L$(OUT) $(LIBRARY)
 	@echo ""
 
 test_basic_parallel_fsa: basic_parallel_fsa test_data
-	$(CC) $(CC_FLAGS) -no-vec test.c image_model.c basic_parallel_fsa_operations.c -o $(OUT)/test_basic_parallel_fsa -I$(INC) -L$(OUT) $(LIBRARY)
+	$(CC) $(CC_FLAGS) $(MMIC) -no-vec test.c image_model.c basic_parallel_fsa_operations.c -o $(OUT)/test_basic_parallel_fsa -I$(INC) -L$(OUT) $(LIBRARY)
 	@echo ""
 
 test_basic_parallel_def_vec: basic_parallel_def_vec test_data
-	$(CC) $(CC_FLAGS) test.c image_model.c basic_parallel_operations.c -o $(OUT)/test_basic_parallel_def_vec -I$(INC) -L$(OUT) $(LIBRARY)
+	$(CC) $(CC_FLAGS) $(MMIC) test.c image_model.c basic_parallel_operations.c -o $(OUT)/test_basic_parallel_def_vec -I$(INC) -L$(OUT) $(LIBRARY)
 	@echo ""
 
 generate_testcase: dependencies
-	$(CC) $(CC_FLAGS) -no-vec generate_testcase.c image_model.c -o $(OUT)/generate_testcase -I$(INC) -L$(OUT) $(LIBRARY)
+	@if [ "$(MMIC)" != "-mmic" ]; then \
+	$(CC) $(CC_FLAGS) -no-vec generate_testcase.c image_model.c -o $(OUT)/generate_testcase -I$(INC) -L$(OUT) $(LIBRARY); \
+	fi
 	@echo ""
 
 test_data: generate_testcase
-#	test -f `pwd`/test_data/2048.model || ./out/generate_testcase 2048 2048 `pwd`/test_data/2048.model
-#	test -f `pwd`/test_data/4096.model || ./out/generate_testcase 4096 4096 `pwd`/test_data/4096.model
 	test -f `pwd`/test_data/8192.model || ./out/generate_testcase 8192 8192 `pwd`/test_data/8192.model
-#	test -f `pwd`/test_data/16384.model || ./out/generate_testcase 16384 16384 `pwd`/test_data/16384.model
 	test -f `pwd`/test_data/32768.model || ./out/generate_testcase 32768 32768 `pwd`/test_data/32768.model
-#	test -f `pwd`/test_data/48000.model || ./out/generate_testcase 48000 48000 `pwd`/test_data/48000.model
-#	test -f `pwd`/test_data/56000.model || ./out/generate_testcase 56000 56000 `pwd`/test_data/56000.model
 	@echo ""
 
 dependencies: out_dir qdbmp
@@ -66,7 +65,7 @@ out_dir:
 	@mkdir -p test_data
 
 qdbmp:
-	$(CC) $(QDBMP_PATH)/qdbmp.c -c -o $(OUT)/qdbmp.o
+	$(CC) $(MMIC) $(QDBMP_PATH)/qdbmp.c -c -o $(OUT)/qdbmp.o
 	ar rcs $(OUT)/libqdbmp.a $(OUT)/qdbmp.o
 	@echo ""
 
