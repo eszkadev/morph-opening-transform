@@ -13,3 +13,8 @@ Makefile - use for normal build with gcc. You will be able to test application u
 
 ## Dependencies
 * QDBMP - BMP library  
+
+## Results
+![Small dataset](img/small.png)
+![Big dataset](img/big.png)
+![Speedup](img/speedup.png)
